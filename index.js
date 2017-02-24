@@ -89,3 +89,5 @@ var server = app.listen(5001, function() {
 
     console.log('elevation-server listening at http://%s:%s', host, port);
 });
+
+module.exports = app;
