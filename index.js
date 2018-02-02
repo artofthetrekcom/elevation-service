@@ -49,7 +49,6 @@ var corsOptions = {
   }
 };
 
-app.use(cors(corsOptions));
 app.use(bodyParser.json({limit: maxPostSize}));
 app.use(function(req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
@@ -58,7 +57,7 @@ app.use(function(req, res, next) {
     next();
 });
 
-app.post('/geojson', function(req, res) {
+app.post('/geojson',cors(corsOptions), function(req, res) {
     var geojson = req.body;
 
     if (!geojson || Object.keys(geojson).length === 0) {
