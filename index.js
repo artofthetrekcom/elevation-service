@@ -3,6 +3,7 @@ var addElevation = require('geojson-elevation').addElevation,
     ImagicoElevationDownloader = require('node-hgt').ImagicoElevationDownloader,
     express = require('express'),
     bodyParser = require('body-parser'),
+    cors = require('cors'),
     app = express(),
     tileDirectory = process.env.TILE_DIRECTORY,
     tiles,
@@ -30,6 +31,25 @@ if (process.env.MAX_POST_SIZE) {
     maxPostSize = process.env.MAX_POST_SIZE;
 }
 
+var whitelist = [
+  'http://routedata.artofthetrek.com',
+  'http://routedatadev.artofthetrek.com',
+  'http://tp.artofthetrek.com',
+  'http://tpdev.artofthetrek.com',
+  'route-data'
+];
+
+var corsOptions = {
+  origin: function (origin, callback) {
+    if (whitelist.indexOf(origin) !== -1) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  }
+};
+
+app.use(cors(corsOptions));
 app.use(bodyParser.json({limit: maxPostSize}));
 app.use(function(req, res, next) {
     res.header('Access-Control-Allow-Origin', '*');
@@ -37,6 +57,7 @@ app.use(function(req, res, next) {
     res.contentType('application/json');
     next();
 });
+
 app.post('/geojson', function(req, res) {
     var geojson = req.body;
 
