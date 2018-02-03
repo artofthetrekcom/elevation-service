@@ -36,6 +36,9 @@ var whitelist = [
   'http://routedatadev.artofthetrek.com',
   'http://tp.artofthetrek.com',
   'http://tpdev.artofthetrek.com',
+  'http://manage.aott.local:4200',
+  'http://public.aott.local:4100',
+  'http://plan.aott.local:4300',
   'route-data'
 ];
 
