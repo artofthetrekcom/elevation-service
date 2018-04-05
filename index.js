@@ -1,4 +1,5 @@
 const {json, send} = require('micro')
+const microCors = require('micro-cors')
 const addElevation = require('geojson-elevation').addElevation
 const TileSet = require('node-hgt').TileSet
 const ImagicoElevationDownloader = require('node-hgt').ImagicoElevationDownloader
@@ -7,10 +8,21 @@ const noData = process.env.NO_DATA ? parseInt(process.env.NO_DATA) : null
 const tileDownloader = process.env.TILE_DOWNLOADER === 'none'
   ? tileDownloader = undefined
   : new ImagicoElevationDownloader(tileDirectory)
-const maxPostSize = process.env.MAX_POST_SIZE || "500kb";
-const tiles = new TileSet(tileDirectory, {downloader:tileDownloader});
+const maxPostSize = process.env.MAX_POST_SIZE || "5120kb"
+const tiles = new TileSet(tileDirectory, {downloader:tileDownloader})
 
-module.exports = async (req, res) => {
+const cors = microCors({
+  allowMethods: ['POST']
+})
+
+module.exports = cors(async (req, res) => {
+
+  res = cors(res)
+
+  if (req.url === '/status' && req.method === 'GET') {
+    return send(res, 200, { status: 'Ok'})
+  }
+
   if (req.method !== 'POST') {
     return send(res, 405, {error: 'Only POST allowed'})
   }
@@ -21,12 +33,12 @@ module.exports = async (req, res) => {
   }
 
   return new Promise((resolve, reject) => {
-    addElevation(geojson, tiles, function(err, geojson) {
+    addElevation(geojson, tiles, function(err, newGeojson) {
       if (err) {
         return send(res, 500, err)
       }
 
-      resolve(geojson)
+      resolve(newGeojson)
     }, noData)
   })
-}
+})
